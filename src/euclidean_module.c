@@ -18,12 +18,38 @@ static double euclidean2_2d(const double* left, const double* right)
     const double x2 = right[0];
     const double y2 = right[1];
 
+    //printf("1=(%f, %f) 2=(%f, %f)\n", x1, y1, x2, y2);
+
     const double xdiff = x1 - x2;
     const double ydiff = y1 - y2;
 
     const double dist = sqrt(xdiff*xdiff + ydiff*ydiff);
 
     return dist;
+}
+
+static double* numpy_array_to_double_array(PyObject* in_array, double* out_array)
+{
+    npy_intp dim;
+
+    PyArray_Descr* descr = PyArray_DescrFromType(NPY_DOUBLE);
+
+    double* npd_array;
+
+    int ret = PyArray_AsCArray(&in_array, &npd_array, &dim, 1, descr);
+
+    if (ret < 0)
+    {
+        PyErr_SetString(PyExc_TypeError, "error converting to c array");
+        return NULL;
+    }
+
+    out_array[0] = npd_array[0];
+    out_array[1] = npd_array[1];
+
+    PyArray_Free(in_array, npd_array);
+
+    return out_array;
 }
 
 static PyObject* euclidean_euclidean2_2d(PyObject* self, PyObject* args)
@@ -49,12 +75,18 @@ static PyObject* euclidean_euclidean2_2d(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    /* Get pointers to the data as C-types. */
-    const double* x = (double*)PyArray_DATA(coord1);
-    const double* y = (double*)PyArray_DATA(coord2);
+    // TODO: Check arrays are of length 2
+
+    double arr1[2];
+    double arr2[2];
+
+    if (!numpy_array_to_double_array(coord1, arr1) || !numpy_array_to_double_array(coord2, arr2))
+    {
+        return NULL;
+    }
 
     /* Call the external C function to compute the distance. */
-    const double value = euclidean2_2d(x, y);
+    const double value = euclidean2_2d(arr1, arr2);
 
     if (value < 0.0) {
         PyErr_SetString(PyExc_RuntimeError, "Euclidean returned an impossible value.");
