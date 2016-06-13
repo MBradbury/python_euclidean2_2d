@@ -28,28 +28,39 @@ static double euclidean2_2d(const double* left, const double* right)
     return dist;
 }
 
-static double* numpy_array_to_double_array(PyObject* in_array, double* out_array)
+static int numpy_array_to_double_array(PyObject* in_array, double* out_array)
 {
+    int result = 0;
+
     npy_intp dim;
 
     PyArray_Descr* descr = PyArray_DescrFromType(NPY_DOUBLE);
 
-    double* npd_array;
+    double* npd_array = NULL;
 
     int ret = PyArray_AsCArray(&in_array, &npd_array, &dim, 1, descr);
 
     if (ret < 0)
     {
         PyErr_SetString(PyExc_TypeError, "error converting to c array");
-        return NULL;
+        result = -1;
+        goto end;
+    }
+
+    if (dim != 2)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "invalid length, not 2");
+        result = -2;
+        goto end;
     }
 
     out_array[0] = npd_array[0];
     out_array[1] = npd_array[1];
 
+end:
     PyArray_Free(in_array, npd_array);
 
-    return out_array;
+    return result;
 }
 
 static PyObject* euclidean_euclidean2_2d(PyObject* self, PyObject* args)
@@ -80,7 +91,7 @@ static PyObject* euclidean_euclidean2_2d(PyObject* self, PyObject* args)
     double arr1[2];
     double arr2[2];
 
-    if (!numpy_array_to_double_array(coord1, arr1) || !numpy_array_to_double_array(coord2, arr2))
+    if (numpy_array_to_double_array(coord1, arr1) < 0 || numpy_array_to_double_array(coord2, arr2) < 0)
     {
         return NULL;
     }

@@ -1,5 +1,5 @@
 from distutils.core import setup, Extension
-setup(name="euclidean", version="1.0.1",
+setup(name="euclidean", version="1.0.2",
 	  description="Provides a fast implementation of euclidean distance",
 	  author="Matthew Bradbury",
 	  license="MIT",
