@@ -6,5 +6,6 @@ setup(name="euclidean", version="1.0.2",
       url="https://github.com/MBradbury/python_euclidean2_2d",
       ext_modules=[Extension("euclidean", ["src/euclidean_module.c"])],
       classifiers=["Programming Language :: Python :: 2",
-                   "Programming Language :: Python :: 3"]
+                   "Programming Language :: Python :: 3",
+                   "Programming Language :: Python :: Implementation :: CPython"]
 )
